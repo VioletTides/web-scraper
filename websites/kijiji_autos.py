@@ -52,7 +52,7 @@ def kijiji_autos_search(callback, manufacturer, model, yearLower, yearUpper):
 
         # Extract the price using the specific data-testid attribute
         price_element = car_listing.find("div", attrs={"data-testid": "VehicleListItem-price"})
-        price = price_element.text.strip() if price_element else "N/A"
+        price = price_element.text.strip()[1:] if price_element else "N/A"
         
         # Extract the kilometers and location using data-testid
         meta = car_listing.find_all("span", attrs={"data-testid": "VehicleListItemAttributeValue"})

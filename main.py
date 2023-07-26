@@ -1,14 +1,36 @@
-from selenium import webdriver
 import websites.kijiji_autos as kijiji_autos
 import websites.kijiji as kijiji
 import websites.craigslist as craigslist
 import websites.autotrader as autotrader
 import websites.facebook as facebook
-from csv_combiner import combine_csv_files
-import time
+from utilities import combine_csv_files, chart_data
 import tkinter as tk
 import customtkinter as ctk
 import threading
+
+def search_all_websites(callback, manufacturer, model, yearLower, yearUpper):
+    # Define a list to store the threads
+    threads = []
+
+    # Function to start a website search in a separate thread
+    def start_website_search(search_function):
+        thread = threading.Thread(target=search_function, args=(callback, manufacturer, model, yearLower, yearUpper))
+        threads.append(thread)
+        thread.start()
+
+    # Add all website search functions here
+    start_website_search(kijiji.kijiji_search)
+    start_website_search(kijiji_autos.kijiji_autos_search)
+    start_website_search(autotrader.autotrader_search)
+    start_website_search(craigslist.craigslist_search)
+    start_website_search(facebook.facebook_search)
+
+    # Wait for all threads to finish before continuing
+    for thread in threads:
+        thread.join()
+
+    # All searches are complete
+    callback("All website searches are complete!", "success")
 
 # Getting input for car manufacturer, model, year, etc. (this doesn't work some website URLs are hardcoded lol)
 manufacturer = "mazda"
@@ -36,9 +58,10 @@ sidebar = ctk.CTkFrame(main_frame, width=200)
 sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
 sidebar.pack_propagate(0)
 
-# Title
-title = ctk.CTkLabel(sidebar, text="Car Web Scraper", font=("Arial", 20))
-title.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+# Search all button
+search_all_button = ctk.CTkButton(sidebar, text="Search all", font=("Arial", 18), command=lambda: threading.Thread(target=search_all_websites, args=(callback, manufacturer, model, yearLower, yearUpper)).start())
+search_all_button.pack(fill=tk.X, padx=10, pady=10)
+search_all_button.pack_propagate(0)
 
 # Search Kijiji button
 kijiji_button = ctk.CTkButton(sidebar, text="Search Kijiji", font=("Arial", 18), command=lambda: threading.Thread(target=kijiji.kijiji_search, args=(callback, manufacturer, model, yearLower, yearUpper)).start())
@@ -65,15 +88,59 @@ facebook_button = ctk.CTkButton(sidebar, text="Search Facebook", font=("Arial", 
 facebook_button.pack(fill=tk.X, padx=10, pady=10)
 facebook_button.pack_propagate(0)
 
-# Combine CSVs button with bigger text and green button
+# Plot data button
+plot_data_button = ctk.CTkButton(sidebar, text="Plot data", font=("Arial", 18), command=lambda: threading.Thread(target=chart_data, args=(output_file,)).start())
+plot_data_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+plot_data_button.pack_propagate(0)
+
+# Combine CSVs button
 combine_csvs_button = ctk.CTkButton(sidebar, text="Combine CSVs", font=("Arial", 18), command=lambda: threading.Thread(target=combine_csv_files, args=(callback, input_files, output_file)).start())
 combine_csvs_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
 combine_csvs_button.pack_propagate(0)
 
+# Right side with options panel and console log below
+
+# Options panel
+options_panel = ctk.CTkFrame(main_frame, height=150)
+options_panel.pack(side=tk.TOP, fill=tk.BOTH, padx=10, pady=10)
+options_panel.pack_propagate(0)
+
+# Title
+title = ctk.CTkLabel(options_panel, text="Car Web Scraper", font=("Arial", 20))
+title.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+# Car Manufacturer and Model on the same line
+manufacturer_model_frame = ctk.CTkFrame(options_panel)
+manufacturer_model_frame.pack(side=tk.TOP, fill=tk.X, expand=True)
+
+manufacturer_entry = ctk.CTkEntry(manufacturer_model_frame)
+manufacturer_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+model_entry = ctk.CTkEntry(manufacturer_model_frame)
+model_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+# Years on the next line
+years_frame = ctk.CTkFrame(options_panel)
+years_frame.pack(side=tk.TOP, fill=tk.X, expand=True)
+
+year_lower_entry = ctk.CTkEntry(years_frame)
+year_lower_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+year_upper_entry = ctk.CTkEntry(years_frame)
+year_upper_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+note_text = ctk.CTkLabel(options_panel, text="these fields don't work it's just to show the data lol", font=("Arial", 14))
+note_text.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+# Set the default values in the input fields
+manufacturer_entry.insert(0, manufacturer)
+model_entry.insert(0, model)
+year_lower_entry.insert(0, yearLower)
+year_upper_entry.insert(0, yearUpper)
+
 # Console log
-console_log = ctk.CTkTextbox(main_frame, width=600, height=400)
+console_log = ctk.CTkTextbox(main_frame)
 console_log.configure(state="disabled")
-console_log.pack(side=ctk.RIGHT, fill=tk.BOTH, padx=10, pady=10)
+console_log.pack(side=ctk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=10)
 
 def callback(message, colour="white"):
     console_log.configure(state="normal")  # Allows the textbox to be edited

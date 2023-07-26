@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import time
 import csv
 from datetime import datetime
+from utilities import parse_date_time
 
 
 alberta = {
@@ -90,7 +91,7 @@ def craigslist_search(callback, manufacturer, model, yearLower, yearUpper):
 
                 # Extract the price
                 price_element = car_listing.find("span", class_="priceinfo")
-                price = price_element.text.strip() if price_element else "N/A"
+                price = price_element.text.strip()[1:] if price_element else "N/A"
 
                 # Extract the date posted kilometers, and location from the metadata
                 meta_element = car_listing.find("div", class_="meta")
@@ -103,6 +104,7 @@ def craigslist_search(callback, manufacturer, model, yearLower, yearUpper):
                     date = date.strftime("%d/%m/%Y")
                 except ValueError:
                     date = "Invalid Date"
+                date = parse_date_time(date)
 
                 kilometers = meta_list[1][:-2] if len(meta_list) >= 2 else "N/A"
 
@@ -127,4 +129,5 @@ def craigslist_search(callback, manufacturer, model, yearLower, yearUpper):
             callback(f"Finished searching {city}!")
             time.sleep(2) # Prevents rate limiting
         callback(f"Finsihed searching {province_names[provinces.index(province)]}!", "partial_success")
+    driver.quit()
     callback("Finished searching craigslist! Output saved to ./logs/craigslist.csv", "success")

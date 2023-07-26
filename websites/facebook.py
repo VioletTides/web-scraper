@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import time
 import csv
 from datetime import datetime
-from lxml import etree
+from utilities import parse_date_time
 
 cities_canada = ["vancouver", "calgary", "edmonton", "saskatoon", "winnipeg", "toronto", "ottawa", "montreal", "halifax", "st-johns", "victoria", "regina", "hamilton", "london_ontario", "104045032964460", "windsor", "106063096092020", "114418101908145", "kingston-ca", "112068512144714", "115104881837942", "102170323157613", "111551465530472", "101877776521079", "111949595490847", "112008808810771", "110893392264912"]
 canadian_cities_names = ["vancouver", "calgary", "edmonton", "saskatoon", "winnipeg", "toronto", "ottawa", "montreal", "halifax", "stjohns", "victoria", "regina", "hamilton", "london", "kitchener", "windsor", "stcatharines", "oshawa", "kingston", "fredericton", "charlottetown", "moncton", "thunderbay", "sudbury", "kelowna", "abbotsford", "barrie"]
@@ -58,7 +58,7 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
             # Check for original price before reduction and remove it from the list
             if "$" in meta_element[1].text.strip():
                 meta_element.pop(1)
-            price = meta_element[0].text.strip()[1:] if meta_element else "N/A"
+            price = meta_element[0].text.strip()[2:] if meta_element else "N/A"
 
             title = meta_element[1].text.strip() if meta_element else "N/A"
 
@@ -71,6 +71,16 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
             link_list = raw_link.split("?")
             formatted_link = f"https://www.facebook.com{link_list[0]}" if link_list else "N/A"
 
+            # Go to the listing and find out approximate posting date
+            temp_driver = webdriver.Chrome()
+            temp_driver.get(formatted_link)
+            temp_page_source = temp_driver.page_source
+            temp_soup = BeautifulSoup(temp_page_source, "html.parser")
+            date_element = temp_soup.find("span", class_="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1nxh6w3 x1sibtaa xo1l8bm xi81zsa")
+            raw_date = date_element.text.strip() if date_element else "N/A"
+            date = parse_date_time(raw_date)
+            temp_driver.close()
+
             # Generate a unique identifier for each car
             unique_id = f"{title}_{price}"
 
@@ -81,8 +91,9 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
                 # Write data to CSV
                 with open("./logs/facebook.csv", "a", newline="", encoding="utf-8") as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerow([title, price, kilometers, "N/A", location, formatted_link])
+                    csv_writer.writerow([title, price, kilometers, date, location, formatted_link])
 
         callback(f"Finished searching {canadian_cities_names[cities_canada.index(city)]}!")
         time.sleep(2) # Prevents rate limiting
+    driver.quit()    
     callback("Finished searching facebook! Output saved to ./logs/facebook.csv", "success")

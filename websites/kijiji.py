@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import re
 import csv
+from utilities import parse_date_time
 
 def kijiji_search(callback, manufacturer, model, yearLower, yearUpper):
     driver = webdriver.Chrome()
@@ -43,11 +44,12 @@ def kijiji_search(callback, manufacturer, model, yearLower, yearUpper):
 
         # Extract the price
         price_element = car_listing.find("div", class_="price")
-        price = price_element.text.strip() if price_element else "N/A"
+        price = price_element.text.strip()[1:] if price_element else "N/A"
 
         # Extract the date posted
         date_element = car_listing.find("span", class_="date-posted")
         date = date_element.text.strip() if date_element else "N/A"
+        date = parse_date_time(date)
 
         # Extract the kilometers
         kilometers_element = car_listing.find("div", class_="details")

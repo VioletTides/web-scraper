@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import csv
+from utilities import parse_date_time
 
 photo_upload_year = "2023" # CHANGE DEPENDING ON YEAR
 
@@ -45,7 +46,7 @@ def autotrader_search(callback, manufacturer, model, yearLower, yearUpper):
 
         # Extract the price
         price_element = car_listing.find("span", class_="price-amount")
-        price = price_element.text.strip() if price_element else "N/A"
+        price = price_element.text.strip()[1:] if price_element else "N/A"
 
         # Extract the kilometers
         kilometers_element = car_listing.find("span", class_="odometer-proximity")
@@ -70,6 +71,7 @@ def autotrader_search(callback, manufacturer, model, yearLower, yearUpper):
             if month[0] != "0": 
                 month = f"0{month[0]}"
         date = f"01/{month}/{photo_upload_year}"
+        date = parse_date_time(date)
 
         # Extract the link using the "a" attribute by xpath
         link_element = car_listing.find("a", class_="result-item-inner")
