@@ -1,3 +1,4 @@
+from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,8 +9,10 @@ import csv
 
 # TODO figure out a way to scrape dates as they aren't easily accessible like normal kijiji
 
-def kijiji_autos_search(driver, manufacturer, model, yearLower, yearUpper):
-    print("Starting Kijiji Autos search...")
+def kijiji_autos_search(callback, manufacturer, model, yearLower, yearUpper):
+    driver = webdriver.Chrome()
+    callback("Starting Kijiji Autos search...")
+
     # Format the search query for the URL
     formatted_query = f"{manufacturer}/{model}/#tr=AUTOMATIC_GEAR&yc={yearLower}%3A{yearUpper}"
 
@@ -18,14 +21,14 @@ def kijiji_autos_search(driver, manufacturer, model, yearLower, yearUpper):
     driver.get(url)
 
     # Wait for the search results to load
-    print("Waiting for all listings to load...")
-    wait = WebDriverWait(driver, 10)
+    callback("Waiting for all listings to load...")
+    wait = WebDriverWait(driver, 20)
     #wait until the element with the attribute data-testid="SearchResultListItem" is present
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='SearchResultListItem']")))
 
     # Move the mouse to hover over each "article" element to trigger the href to load
     articles = driver.find_elements(By.TAG_NAME, "article")
-    print("Hovering over element...")
+    callback("Hovering over element...")
     for article in articles:
         ActionChains(driver).move_to_element(article).perform()
 
@@ -34,7 +37,7 @@ def kijiji_autos_search(driver, manufacturer, model, yearLower, yearUpper):
     soup = BeautifulSoup(page_source, "html.parser")
 
     # Find all car listings on the search results page
-    print("Collecting listing data...")
+    callback("Collecting listing data...")
     car_listings = soup.find_all(attrs={"data-testid": "SearchResultListItem"})
 
     # Wipe the file clean with search information on each new line
@@ -51,10 +54,16 @@ def kijiji_autos_search(driver, manufacturer, model, yearLower, yearUpper):
         price_element = car_listing.find("div", attrs={"data-testid": "VehicleListItem-price"})
         price = price_element.text.strip() if price_element else "N/A"
         
-        # Extract the kilometers using data-testid
-        kilometers_element = car_listing.find("span", attrs={"data-testid": "VehicleListItemAttributeValue"})
-        kilometers = kilometers_element.text.strip() if price_element else "N/A"
+        # Extract the kilometers and location using data-testid
+        meta = car_listing.find_all("span", attrs={"data-testid": "VehicleListItemAttributeValue"})
+        kilometers_element = meta[0]
+        kilometers = kilometers_element.text.strip() if kilometers_element else "N/A"
         kilometers = kilometers[:-3] # Only keeps the number (with commas) by removing KM and some weirdo icon character
+        
+        location_element = meta[1]
+        location = location_element.text.strip().split(",")[0] if location_element else "Invalid Location"
+        if location == "-":
+            location = "Invalid Location"
         
         # Extract the link using the "a" attribute by xpath
         link_element = car_listing.find("a")
@@ -66,5 +75,6 @@ def kijiji_autos_search(driver, manufacturer, model, yearLower, yearUpper):
         # Log the data to the file keeping spacing between each listing horizontally with ljust
         with open("./logs/kijiji_autos.csv", "a", newline="", encoding="utf-8") as csvfile:
             csv_writer = csv.writer(csvfile)
-            csv_writer.writerow([title,price,kilometers,"N/A","N/A",formatted_link])
-    print("Done searching kijijiautos.ca!")
+            csv_writer.writerow([title,price,kilometers,"N/A",location,formatted_link])
+    driver.quit()
+    callback("Done searching kijijiautos.ca! Output saved to ./logs/kijiji_autos.csv", "success")

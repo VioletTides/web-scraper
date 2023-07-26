@@ -1,7 +1,7 @@
 import csv
 
-def combine_csv_files(input_files, output_file):
-    print("Combining CSV files...")
+def combine_csv_files(callback, input_files, output_file):
+    callback("Combining CSV files...")
 
     # Hardcoded header for column names
     header = ["title", "price", "kilometers", "date_posted", "location", "link"]
@@ -33,4 +33,4 @@ def combine_csv_files(input_files, output_file):
                     if unique_id not in unique_entries:
                         unique_entries.add(unique_id)  # Add the unique entry to the set to mark it as processed
                         csv_writer.writerow(row)
-    print("CSV files combined!")
+    callback("CSV files combined! Output saved to ./logs/combined.csv", "success")

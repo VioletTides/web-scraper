@@ -1,3 +1,4 @@
+from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -6,8 +7,9 @@ from bs4 import BeautifulSoup
 import re
 import csv
 
-def kijiji_search(driver, manufacturer, model, yearLower, yearUpper):
-    print("Starting Kijiji search...")
+def kijiji_search(callback, manufacturer, model, yearLower, yearUpper):
+    driver = webdriver.Chrome()
+    callback("Starting Kijiji search...", "normal")
 
     # Format the search query for the URL
     formatted_query = f"{manufacturer}-mx5miata-{yearLower}__{yearUpper}/c174l0a54a1000054a68?transmission=2"
@@ -17,7 +19,7 @@ def kijiji_search(driver, manufacturer, model, yearLower, yearUpper):
     driver.get(url)
 
     # Wait for the search results to load
-    print("Waiting for all listings to load...")
+    callback("Waiting for all listings to load...", "normal")
     wait = WebDriverWait(driver, 10)
     #wait until the elements are present
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".search-item")))
@@ -27,7 +29,7 @@ def kijiji_search(driver, manufacturer, model, yearLower, yearUpper):
     soup = BeautifulSoup(page_source, "html.parser")
 
     # Get the page source and create a BeautifulSoup object
-    print("Collecting listing data...")
+    callback("Collecting listing data...", "normal")
     car_listings = soup.find_all("div", class_="search-item")
     
     # Wipe the file clean with search information on each new line
@@ -66,4 +68,5 @@ def kijiji_search(driver, manufacturer, model, yearLower, yearUpper):
         with open("./logs/kijiji.csv", "a", newline="", encoding="utf-8") as csvfile:
             csv_writer = csv.writer(csvfile)
             csv_writer.writerow([title,price,formatted_kilometers,date,location,formatted_link])
-    print("Done searching Kijiji.ca!")
+    driver.quit()
+    callback("Done searching Kijiji.ca! Output saved to ./logs/kijiji.csv", "success")
