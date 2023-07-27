@@ -82,7 +82,7 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
             temp_driver.close()
 
             # Generate a unique identifier for each car
-            unique_id = f"{title}_{price}"
+            unique_id = f"{title}_{price}_{kilometers}"
 
             # Check if the unique_id is already in the set, if not, process the car listing
             if unique_id not in unique_listings:

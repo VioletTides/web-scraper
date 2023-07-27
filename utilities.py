@@ -44,6 +44,72 @@ def parse_date_time(date_posted_str):
 
     return date_posted
 
+def compare_csv_files(callback, old_file, current_file):
+    # check if there are new entries (car listings) in the current file
+    callback("Comparing CSV files...")
+
+    # Load the old file and current file data into lists
+    old_data = load_csv(old_file)
+    current_data = load_csv(current_file)
+
+    # Create a set of unique links from the old data
+    old_links = set(entry["link"] for entry in old_data)
+
+    # Initialize lists to store new and updated entries
+    new_entries = []
+    updated_entries = []
+
+    # Compare entries in the current file with the old file and callback progress
+    for entry in current_data:
+        link = entry["link"]
+        if link not in old_links:
+            # If the link is not in the old data, it's a new entry
+            new_entries.append(entry)
+            callback(f"New entry found: {entry['title']}")
+        else:
+            # If the link is in the old data, check for updates
+            old_entry = next(item for item in old_data if item["link"] == link)
+            if entry != old_entry:
+                # If the entry is different, consider it as an update
+                updated_entries.append(entry)
+                callback(f"Updated entry found: {entry['title']}")
+
+    # Save new entries and updated entries to the comparison file
+    save_csv(new_entries + updated_entries, "./logs/comparison.csv")
+
+    if not new_entries:
+        callback("No new entries found!")
+    else:
+        callback(f"Found {len(new_entries)} new entries!", "success")
+    if not updated_entries:
+        callback("No updated entries found!")
+    else:
+        callback(f"Found {len(updated_entries)} updated entries!", "success")
+
+def load_csv(file_path):
+    # Load CSV data from the given file path into a list of dictionaries
+    with open(file_path, "r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        data = list(reader)
+    return data
+
+def save_csv(data, file_path):
+    # Save CSV data to the given file path
+    with open(file_path, "w", newline="", encoding="utf-8") as file:
+        fieldnames = data[0].keys() if data else []
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
+
+def archive_csv_file(callback, file_path):
+    # Archive the given CSV file by copying the contents
+    callback("Archiving CSV file...")
+    with open(file_path, "r", newline="", encoding="utf-8") as file:
+        data = file.read()
+    with open(f"./logs/archive.csv", "w", newline="", encoding="utf-8") as file:
+        file.write(data)
+    callback("CSV file archived!")
+
 def chart_data(csv_file_path):
     # Lists to store data from the CSV file
     prices = []

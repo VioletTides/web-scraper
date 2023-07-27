@@ -3,7 +3,7 @@ import websites.kijiji as kijiji
 import websites.craigslist as craigslist
 import websites.autotrader as autotrader
 import websites.facebook as facebook
-from utilities import combine_csv_files, chart_data
+from utilities import combine_csv_files, chart_data, archive_csv_file, compare_csv_files
 import tkinter as tk
 import os
 import customtkinter as ctk
@@ -89,6 +89,18 @@ facebook_button = ctk.CTkButton(sidebar, text="Search Facebook", font=("Arial", 
 facebook_button.pack(fill=tk.X, padx=10, pady=10)
 facebook_button.pack_propagate(0)
 
+# Combine CSVs button
+combine_csvs_button = ctk.CTkButton(sidebar, text="Combine CSVs", font=("Arial", 18), command=lambda: threading.Thread(target=combine_csv_files, args=(callback, input_files, output_file)).start())
+combine_csvs_button.pack(fill=tk.X, side=tk.TOP, padx=10, pady=10)
+combine_csvs_button.pack_propagate(0)
+
+# Archive current combined csv file button
+archive_csv_button = ctk.CTkButton(sidebar, text="Archive CSV", font=("Arial", 18), command=lambda: threading.Thread(target=archive_csv_file, args=(callback, output_file)).start())
+archive_csv_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+archive_csv_button.pack_propagate(0)
+danger_label = ctk.CTkLabel(sidebar, text="Only press archive ONCE,\nthen every day search all\nwebsites and compare CSVs", font=("Arial", 13), fg_color="red", height=80)
+danger_label.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+
 # Plot data button
 plot_data_button = ctk.CTkButton(sidebar, text="Plot data", font=("Arial", 18), command=lambda: threading.Thread(target=chart_data, args=(output_file,)).start())
 plot_data_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
@@ -99,10 +111,10 @@ open_csv_button = ctk.CTkButton(sidebar, text="Open CSV log", font=("Arial", 18)
 open_csv_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
 open_csv_button.pack_propagate(0)
 
-# Combine CSVs button
-combine_csvs_button = ctk.CTkButton(sidebar, text="Combine CSVs", font=("Arial", 18), command=lambda: threading.Thread(target=combine_csv_files, args=(callback, input_files, output_file)).start())
-combine_csvs_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
-combine_csvs_button.pack_propagate(0)
+# Compare CSVs button
+compare_csvs_button = ctk.CTkButton(sidebar, text="Compare CSVs", font=("Arial", 18), command=lambda: threading.Thread(target=compare_csv_files, args=(callback, "./logs/archive.csv", output_file)).start())
+compare_csvs_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+compare_csvs_button.pack_propagate(0)
 
 # Right side with options panel and console log below
 

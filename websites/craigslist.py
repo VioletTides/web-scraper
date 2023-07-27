@@ -115,7 +115,7 @@ def craigslist_search(callback, manufacturer, model, yearLower, yearUpper):
                 formatted_link = link_element.get("href") if link_element else "N/A"
 
                 # Generate a unique identifier for each car
-                unique_id = f"{title}_{price}"
+                unique_id = f"{title}_{price}_{kilometers}"
 
                 # Check if the unique_id is already in the set, if not, process the car listing
                 if unique_id not in unique_listings:
