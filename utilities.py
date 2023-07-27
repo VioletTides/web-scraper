@@ -29,7 +29,7 @@ def parse_date_time(date_posted_str):
             # If the above format fails, handle special cases like "a week ago," "a day ago," "a month ago," etc.
             if "a week ago" in date_posted_str:
                 date_posted = datetime.now() - timedelta(weeks=1)
-            elif "a day ago" in date_posted_str:
+            elif "a day ago" or "Yesterday" in date_posted_str:
                 date_posted = datetime.now() - timedelta(days=1)
             elif "a month ago" in date_posted_str:
                 # Note: Using 30 days approximation for a month
@@ -37,6 +37,10 @@ def parse_date_time(date_posted_str):
             else:
                 # If none of the formats match, set the date_posted to None or raise an error as needed
                 date_posted = None
+
+    # Extract only the date part
+    if date_posted:
+        date_posted = date_posted.date()
 
     return date_posted
 
@@ -108,6 +112,7 @@ def combine_csv_files(callback, input_files, output_file):
                         if unique_id not in unique_entries:
                             unique_entries.add(unique_id)  # Add the unique entry to the set to mark it as processed
                             csv_writer.writerow(row)
-    except:
-        
+    except Exception as e:
+        callback(f"Error: {e}", "error")
+        return
     callback("CSV files combined! Output saved to ./logs/combined.csv", "success")

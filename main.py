@@ -5,6 +5,7 @@ import websites.autotrader as autotrader
 import websites.facebook as facebook
 from utilities import combine_csv_files, chart_data
 import tkinter as tk
+import os
 import customtkinter as ctk
 import threading
 
@@ -46,7 +47,7 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 app = ctk.CTk()
-app.geometry("800x500")
+app.geometry("800x700")
 app.title("Car Web Scraper")
 
 # Main Frame
@@ -92,6 +93,11 @@ facebook_button.pack_propagate(0)
 plot_data_button = ctk.CTkButton(sidebar, text="Plot data", font=("Arial", 18), command=lambda: threading.Thread(target=chart_data, args=(output_file,)).start())
 plot_data_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
 plot_data_button.pack_propagate(0)
+
+# Open CSV log button
+open_csv_button = ctk.CTkButton(sidebar, text="Open CSV log", font=("Arial", 18), command=lambda: threading.Thread(os.startfile(os.path.abspath("./logs/combined.csv"))).start())
+open_csv_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+open_csv_button.pack_propagate(0)
 
 # Combine CSVs button
 combine_csvs_button = ctk.CTkButton(sidebar, text="Combine CSVs", font=("Arial", 18), command=lambda: threading.Thread(target=combine_csv_files, args=(callback, input_files, output_file)).start())
