@@ -51,8 +51,8 @@ provinces = [alberta, british_columbia, manitoba, new_brunswick, newfoundland_an
 province_names = ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Northwest Territories", "Nova Scotia", "Ontario", "PEI", "Saskatchewan", "Yukon"]
 
 def craigslist_search(callback, manufacturer, model, yearLower, yearUpper):
-    driver = webdriver.Chrome()
     callback("Starting craigslist Canada search...")
+    driver = webdriver.Chrome()
 
     # Wipe the file clean with search information on each new line
     with open("./logs/craigslist.csv", "w") as f:

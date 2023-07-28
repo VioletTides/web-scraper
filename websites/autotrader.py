@@ -10,8 +10,8 @@ from utilities import parse_date_time
 photo_upload_year = "2023" # CHANGE DEPENDING ON YEAR
 
 def autotrader_search(callback, manufacturer, model, yearLower, yearUpper):
-    driver = webdriver.Chrome()
     callback("Starting autotrader.ca search...")
+    driver = webdriver.Chrome()
 
     # Wipe the file clean with search information on each new line
     with open("./logs/autotrader.csv", "w") as f:

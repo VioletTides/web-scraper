@@ -10,8 +10,8 @@ import csv
 # TODO figure out a way to scrape dates as they aren't easily accessible like normal kijiji
 
 def kijiji_autos_search(callback, manufacturer, model, yearLower, yearUpper):
-    driver = webdriver.Chrome()
     callback("Starting Kijiji Autos search...")
+    driver = webdriver.Chrome()
 
     # Format the search query for the URL
     formatted_query = f"{manufacturer}/{model}/#tr=AUTOMATIC_GEAR&yc={yearLower}%3A{yearUpper}"

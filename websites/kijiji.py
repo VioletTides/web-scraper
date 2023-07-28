@@ -9,8 +9,8 @@ import csv
 from utilities import parse_date_time
 
 def kijiji_search(callback, manufacturer, model, yearLower, yearUpper):
-    driver = webdriver.Chrome()
     callback("Starting Kijiji search...", "normal")
+    driver = webdriver.Chrome()
 
     # Format the search query for the URL
     formatted_query = f"{manufacturer}-mx5miata-{yearLower}__{yearUpper}/c174l0a54a1000054a68?transmission=2"

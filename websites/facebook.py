@@ -14,8 +14,8 @@ canadian_cities_names = ["vancouver", "calgary", "edmonton", "saskatoon", "winni
 
 
 def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
-    driver = webdriver.Chrome()
     callback("Starting facebook Canada search...")
+    driver = webdriver.Chrome()
 
     # Wipe the file clean with search information on each new line
     with open("./logs/facebook.csv", "w") as f:
@@ -25,12 +25,6 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
     unique_listings = set()
 
     for city in cities_canada:
-        # Restart driver every fifth search to prevent rate limiting
-        # if cities_canada.index(city) % 5 == 0:
-        #     callback("Restarting driver to prevent rate limiting...", "warning")
-        #     driver.quit()
-        #     driver = webdriver.Chrome()
-
         callback(f"Searching {canadian_cities_names[cities_canada.index(city)]}...")
 
         # Format the search query for the URL
@@ -71,22 +65,22 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
             link_list = raw_link.split("?")
             formatted_link = f"https://www.facebook.com{link_list[0]}" if link_list else "N/A"
 
-            # Go to the listing and find out approximate posting date
-            temp_driver = webdriver.Chrome()
-            temp_driver.get(formatted_link)
-            temp_page_source = temp_driver.page_source
-            temp_soup = BeautifulSoup(temp_page_source, "html.parser")
-            date_element = temp_soup.find("span", class_="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1nxh6w3 x1sibtaa xo1l8bm xi81zsa")
-            raw_date = date_element.text.strip() if date_element else "N/A"
-            date = parse_date_time(raw_date)
-            temp_driver.close()
-
             # Generate a unique identifier for each car
             unique_id = f"{title}_{price}_{kilometers}"
 
             # Check if the unique_id is already in the set, if not, process the car listing
             if unique_id not in unique_listings:
                 unique_listings.add(unique_id)  # Add the unique_id to the set to mark it as processed
+
+                # Go to the listing and find out approximate posting date
+                temp_driver = webdriver.Chrome()
+                temp_driver.get(formatted_link)
+                temp_page_source = temp_driver.page_source
+                temp_soup = BeautifulSoup(temp_page_source, "html.parser")
+                date_element = temp_soup.find("span", class_="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x676frb x1nxh6w3 x1sibtaa xo1l8bm xi81zsa")
+                raw_date = date_element.text.strip() if date_element else "N/A"
+                date = parse_date_time(raw_date)
+                temp_driver.close()
 
                 # Write data to CSV
                 with open("./logs/facebook.csv", "a", newline="", encoding="utf-8") as csvfile:
