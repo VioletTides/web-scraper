@@ -88,6 +88,6 @@ def facebook_search(callback, manufacturer, model, yearLower, yearUpper):
                     csv_writer.writerow([title, price, kilometers, date, location, formatted_link])
 
         callback(f"Finished searching {canadian_cities_names[cities_canada.index(city)]}!")
-        time.sleep(2) # Prevents rate limiting
+        # time.sleep(2) # Prevents rate limiting
     driver.quit()    
     callback("Finished searching facebook! Output saved to ./logs/facebook.csv", "success")

@@ -96,7 +96,7 @@ combine_csvs_button.pack_propagate(0)
 
 # Plot data button
 plot_data_button = ctk.CTkButton(sidebar, text="Plot data", font=("Arial", 18), command=lambda: threading.Thread(target=chart_data, args=(output_file,)).start())
-plot_data_button.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
+plot_data_button.pack(fill=tk.X, side=tk.BOTaTOM, padx=10, pady=10)
 plot_data_button.pack_propagate(0)
 
 # Open CSV log button
